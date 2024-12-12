@@ -1,3 +1,9 @@
+import orchestrator from "tests/orchestrator";
+
+beforeAll(async () => {
+  await orchestrator.waitForAllServices();
+});
+
 test("Not allowed methods to /api/v1/migration should return 405", async () => {
   var responsePut = await fetch("http://localhost:3000/api/v1/migrations", {
     method: "PUT",
