@@ -3,12 +3,8 @@ import orchestrator from "tests/orchestrator";
 
 beforeAll(async () => {
   await orchestrator.waitForAllServices();
-  await cleanDatabase();
+  await orchestrator.clearDatabase();
 });
-
-async function cleanDatabase() {
-  await database.query("drop schema public cascade; create schema public;");
-}
 
 async function searchMigrationsFromDatabase() {
   return await database.query("SELECT COUNT(*)::int FROM pgmigrations");
