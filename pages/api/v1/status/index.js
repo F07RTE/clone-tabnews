@@ -38,7 +38,7 @@ async function status(request, response) {
       cause: error,
     });
 
-    console.log(publicErrorObject);
+    console.error(publicErrorObject);
     response.status(500).json(publicErrorObject);
   }
 }
