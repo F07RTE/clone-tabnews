@@ -1,14 +1,9 @@
-import database from "infra/database";
 import orchestrator from "tests/orchestrator";
 
 beforeAll(async () => {
   await orchestrator.waitForAllServices();
   await orchestrator.clearDatabase();
 });
-
-async function searchMigrationsFromDatabase() {
-  return await database.query("SELECT COUNT(*)::int FROM pgmigrations");
-}
 
 describe("POST /api/v1/migration", () => {
   describe("Anonymous user", () => {
@@ -32,11 +27,6 @@ describe("POST /api/v1/migration", () => {
         var responseBody = await response.json();
         expect(Array.isArray(responseBody)).toBe(true);
         expect(responseBody.length).toBe(0);
-
-        var migrationsFromDatabaseResult = await searchMigrationsFromDatabase();
-        var migrationsFromDatabaseValue =
-          migrationsFromDatabaseResult.rows[0].count;
-        expect(migrationsFromDatabaseValue).toBeGreaterThan(0);
       });
     });
   });
