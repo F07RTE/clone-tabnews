@@ -1,26 +1,17 @@
+import { createRouter } from "next-connect";
 import migrationsRunner from "node-pg-migrate";
 import { resolve } from "node:path";
 import database from "infra/database.js";
+import controller from "infra/controller";
 
-export default async function migrations(request, response) {
-  const allowedMethods = ["GET", "POST"];
+const router = createRouter();
 
-  if (!allowedMethods.includes(request.method)) {
-    return response.status(405).json({
-      error: `Method ${request.method} not allowed`,
-    });
-  }
+router.get(getHandler);
+router.post(postHandler);
 
-  if (request.method === "GET") {
-    return await get(response);
-  }
+export default router.handler(controller.errorHandlers);
 
-  if (request.method === "POST") {
-    return await post(response);
-  }
-}
-
-async function get(response) {
+async function getHandler(request, response) {
   try {
     var dbClient = await database.getNewClient();
     var defaultMigrationOptions = createDefaultMigrationOptions(dbClient);
@@ -31,15 +22,12 @@ async function get(response) {
     });
 
     return response.status(200).json(pendingMigrations);
-  } catch (error) {
-    console.error(error);
-    throw error;
   } finally {
-    await dbClient.end();
+    dbClient?.end();
   }
 }
 
-async function post(response) {
+async function postHandler(request, response) {
   try {
     var dbClient = await database.getNewClient();
     var defaultMigrationOptions = createDefaultMigrationOptions(dbClient);
@@ -54,11 +42,8 @@ async function post(response) {
     }
 
     return response.status(200).json(migratedMigrations);
-  } catch (error) {
-    console.error(error);
-    throw error;
   } finally {
-    await dbClient.end();
+    dbClient?.end();
   }
 }
 
