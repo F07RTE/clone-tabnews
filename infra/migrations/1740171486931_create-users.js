@@ -17,7 +17,7 @@ exports.up = (pgm) => {
       notNull: true,
       unique: true,
     },
-    // Why 60 in length? https://www.npmjs.com/package/bcrypt#hash-info
+    // Why 60 in length? https://security.stackexchange.com/a/184090
     password: {
       type: "varchar(60)",
       notNull: true,
