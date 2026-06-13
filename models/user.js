@@ -159,6 +159,14 @@ async function validateUniqueEmail(email) {
 }
 
 async function hashPasswordInObject(userInputValues) {
+  if (userInputValues.password == null) {
+    const validationErrorObject = new ValidationError({
+      message: "Password cannot be null or empty",
+      action: "Make sure a valid password is provided",
+    });
+    throw validationErrorObject;
+  }
+
   let hashedPassword = await password.hash(userInputValues.password);
   userInputValues.password = hashedPassword;
 }
