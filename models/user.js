@@ -34,6 +34,38 @@ async function findOneByUserName(username) {
   }
 }
 
+async function findOneByEmail(email) {
+  let user = await runSelectQuery(email);
+
+  return user;
+
+  async function runSelectQuery(email) {
+    var result = await database.query({
+      text: `
+        SELECT 
+          *
+        FROM
+          users
+        WHERE
+          LOWER(email) = LOWER($1)
+        LIMIT 1
+          ;
+        `,
+      values: [email],
+    });
+
+    if (result.rowCount === 0) {
+      const validationErrorObject = new NotFoundError({
+        message: "The email was not found.",
+        action: "Please, check if the email is correct.",
+      });
+      throw validationErrorObject;
+    }
+
+    return result.rows[0];
+  }
+}
+
 async function create(userInputValues) {
   await validateUniqueUsername(userInputValues.username);
   await validateUniqueEmail(userInputValues.email);
@@ -174,6 +206,7 @@ async function hashPasswordInObject(userInputValues) {
 const user = {
   create,
   findOneByUserName,
+  findOneByEmail,
   update,
 };
 
