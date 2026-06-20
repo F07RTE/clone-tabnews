@@ -73,19 +73,16 @@ describe("GET /api/v1/user", () => {
 
       const createdSession = await orchestrator.createSession(createdUser);
 
-      var userWithExpiredSessionResponse = await fetch(
-        "http://localhost:3000/api/v1/sessions",
-        {
-          method: "DELETE",
-          headers: {
-            Cookie: `session_id=${createdSession.token}`,
-          },
+      var response = await fetch("http://localhost:3000/api/v1/sessions", {
+        method: "DELETE",
+        headers: {
+          Cookie: `session_id=${createdSession.token}`,
         },
-      );
+      });
 
-      expect(userWithExpiredSessionResponse.status).toBe(200);
+      expect(response.status).toBe(200);
 
-      const responseBody = await userWithExpiredSessionResponse.json();
+      const responseBody = await response.json();
 
       expect(responseBody).toEqual({
         id: responseBody.id,
@@ -104,7 +101,7 @@ describe("GET /api/v1/user", () => {
       ).toBe(true);
 
       // Cookie Assertion
-      const parsedSetCookie = setCookieParser(userWithExpiredSessionResponse, {
+      const parsedSetCookie = setCookieParser(response, {
         map: true,
       });
 

@@ -10,18 +10,19 @@ const {
   UnauthorizedError,
 } = require("infra/errors.js");
 
-function onNoMatchHandler(request, response) {
+function onNoMatchHandler(_request, response) {
   const publicErrorObject = new MethodNotAllowedError();
 
   response.status(publicErrorObject.statusCode).json(publicErrorObject);
 }
 
-function onErrorHandler(error, request, response) {
-  if (
-    error instanceof ValidationError ||
-    error instanceof NotFoundError ||
-    error instanceof UnauthorizedError
-  ) {
+function onErrorHandler(error, _request, response) {
+  if (error instanceof ValidationError || error instanceof NotFoundError) {
+    return response.status(error.statusCode).json(error);
+  }
+
+  if (error instanceof UnauthorizedError) {
+    clearSessionCookie(response);
     return response.status(error.statusCode).json(error);
   }
 

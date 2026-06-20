@@ -158,6 +158,19 @@ describe("GET /api/v1/user", () => {
         action: "Please, make the user is logged and the session is active.",
         status_code: 401,
       });
+
+      // Cookie assertion
+      const parsedSetCookie = setCookieParser(response, {
+        map: true,
+      });
+
+      expect(parsedSetCookie.session_id).toEqual({
+        name: "session_id",
+        value: "invalid",
+        maxAge: -1,
+        path: "/",
+        httpOnly: true,
+      });
     });
 
     test("With a expired session", async () => {
@@ -189,6 +202,19 @@ describe("GET /api/v1/user", () => {
         message: "No session was found for this user.",
         action: "Please, make the user is logged and the session is active.",
         status_code: 401,
+      });
+
+      // Cookie assertion
+      const parsedSetCookie = setCookieParser(response, {
+        map: true,
+      });
+
+      expect(parsedSetCookie.session_id).toEqual({
+        name: "session_id",
+        value: "invalid",
+        maxAge: -1,
+        path: "/",
+        httpOnly: true,
       });
     });
   });
