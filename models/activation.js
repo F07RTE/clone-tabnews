@@ -1,6 +1,8 @@
 import database from "infra/database.js";
+import { NotFoundError } from "infra/errors.js";
 import email from "infra/email.js";
 import webserver from "infra/webserver.js";
+import user from "models/user.js";
 
 const EXPIRATION_IN_MILISECOND = 60 * 60 * 15 * 1000; // 15 minutes
 
@@ -78,10 +80,50 @@ FeedbackToHelp team.
   });
 }
 
+async function markTokenAsUsed(activationTokenId) {
+  const activatedTokenObject = await runUpdateQuery(activationTokenId);
+  return activatedTokenObject;
+
+  async function runUpdateQuery(activationTokenId) {
+    var result = await database.query({
+      text: `
+        UPDATE 
+          user_activation_tokens
+        SET
+          used_at = timezone('utc', now()),
+          updated_at = timezone('utc', now())
+        WHERE
+          id = $1
+
+        RETURNING
+         *
+        `,
+      values: [activationTokenId],
+    });
+
+    if (result.rowCount === 0) {
+      const validationErrorObject = new NotFoundError({
+        message: "The activation token was not found or is expired.",
+        action: "Please, register again.",
+      });
+      throw validationErrorObject;
+    }
+
+    return result.rows[0];
+  }
+}
+
+async function activateUserByUserId(userId) {
+  const activatedUser = await user.setFeatures(userId, ["create:session"]);
+  return activatedUser;
+}
+
 const activation = {
   create,
   findOneValidByActivationTokenId,
   sendEmailToUser,
+  markTokenAsUsed,
+  activateUserByUserId,
 };
 
 export default activation;
