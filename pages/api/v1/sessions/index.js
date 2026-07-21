@@ -3,10 +3,13 @@ import { createRouter } from "next-connect";
 import controller from "infra/controller";
 import authenticator from "models/authenticator.js";
 import session from "models/session.js";
+import authorization from "models/authorization.js";
+import { ForbiddenError } from "infra/errors.js";
 
 const router = createRouter();
 
 router.use(controller.injectAnnonymousOrUser);
+
 router.post(controller.canRequest("create:session"), postHandler);
 router.delete(deleteHandler);
 
@@ -19,6 +22,13 @@ async function postHandler(request, response) {
     sessionInputValues.email,
     sessionInputValues.password,
   );
+
+  if (!authorization.can(autheticatedUser, "create:session")) {
+    throw new ForbiddenError({
+      message: `You don't have permission to perform this action`,
+      action: `Contact the support if you should have access to this feature.`,
+    });
+  }
 
   const createdSession = await session.create(autheticatedUser);
 
