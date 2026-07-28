@@ -11,11 +11,40 @@ beforeAll(async () => {
 });
 
 describe("GET /api/v1/user", () => {
+  describe("Annonymous user", () => {
+    test("Retrieve the endpoint", async () => {
+      const createdUser = await orchestrator.createUser();
+
+      const createdSession = await orchestrator.createSession(createdUser);
+
+      var response = await fetch("http://localhost:3000/api/v1/user", {
+        method: "GET",
+        headers: {
+          Cookie: `session_id=${createdSession.token}`,
+        },
+      });
+
+      expect(response.status).toBe(403);
+
+      const responseBody = await response.json();
+
+      expect(responseBody).toEqual({
+        name: "ForbiddenError",
+        message: "You don't have permission to perform this action",
+        action: "Check if the user has the required feature read:session",
+        status_code: 403,
+      });
+    });
+  });
+
   describe("Default user", () => {
     test("With a valid session", async () => {
       const createdUser = await orchestrator.createUser({
         username: "UserWithValidSession",
+        features: ["read:user"],
       });
+
+      const activatedUser = await orchestrator.activateUser(createdUser.id);
 
       const createdSession = await orchestrator.createSession(createdUser);
 
@@ -39,10 +68,10 @@ describe("GET /api/v1/user", () => {
         id: responseBody.id,
         username: "UserWithValidSession",
         email: createdUser.email,
-        features: ["read:activation_token"],
+        features: ["create:session", "read:session"],
         password: createdUser.password,
         created_at: createdUser.created_at.toISOString(),
-        updated_at: createdUser.updated_at.toISOString(),
+        updated_at: activatedUser.updated_at.toISOString(),
       });
 
       expect(uuidVersion(responseBody.id)).toBe(4);
@@ -88,6 +117,8 @@ describe("GET /api/v1/user", () => {
         username: "UserWithSessionAboutToExpire",
       });
 
+      const activatedUser = await orchestrator.activateUser(createdUser.id);
+
       const createdSession = await orchestrator.createSession(createdUser);
 
       jest.useRealTimers();
@@ -107,10 +138,10 @@ describe("GET /api/v1/user", () => {
         id: responseBody.id,
         username: "UserWithSessionAboutToExpire",
         email: createdUser.email,
-        features: ["read:activation_token"],
+        features: ["create:session", "read:session"],
         password: createdUser.password,
         created_at: createdUser.created_at.toISOString(),
-        updated_at: createdUser.updated_at.toISOString(),
+        updated_at: activatedUser.updated_at.toISOString(),
       });
 
       // Renewed Session Assertions

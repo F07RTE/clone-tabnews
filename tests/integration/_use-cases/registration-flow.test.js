@@ -13,6 +13,7 @@ beforeAll(async () => {
 describe("Use case: Registration Flow (all sucessfull)", () => {
   let userResponseBody;
   let activationTokenObject;
+  let sessionResponseBody;
 
   test("Create user account", async () => {
     var response = await fetch("http://localhost:3000/api/v1/users", {
@@ -81,7 +82,7 @@ describe("Use case: Registration Flow (all sucessfull)", () => {
     expect(Date.parse(responseBody.used_at)).not.toNaN;
 
     const activeUser = await user.findOneById(responseBody.user_id);
-    expect(activeUser.features).toEqual(["create:session"]);
+    expect(activeUser.features).toEqual(["create:session", "read:session"]);
   });
 
   test("Login", async () => {
@@ -98,10 +99,36 @@ describe("Use case: Registration Flow (all sucessfull)", () => {
 
     expect(response.status).toBe(201);
 
-    const responseBody = await response.json();
+    sessionResponseBody = await response.json();
 
-    expect(responseBody.user_id).toBe(userResponseBody.id);
+    expect(sessionResponseBody.user_id).toBe(userResponseBody.id);
   });
 
-  test.todo("Get user information");
+  test("Get user information", async () => {
+    var response = await fetch("http://localhost:3000/api/v1/user", {
+      method: "GET",
+      headers: {
+        Cookie: `session_id=${sessionResponseBody.token}`,
+      },
+    });
+
+    expect(response.status).toBe(200);
+
+    const responseHeaderCacheControl = response.headers.get("Cache-Control");
+    expect(responseHeaderCacheControl).toEqual(
+      "no-store, no-cache, max-age=0, must-revalidate",
+    );
+
+    const responseBody = await response.json();
+
+    expect(responseBody).toEqual({
+      id: userResponseBody.id,
+      username: userResponseBody.username,
+      email: userResponseBody.email,
+      features: ["create:session", "read:session"],
+      password: userResponseBody.password,
+      created_at: userResponseBody.created_at,
+      updated_at: responseBody.updated_at,
+    });
+  });
 });
