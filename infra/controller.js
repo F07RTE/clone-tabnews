@@ -103,8 +103,8 @@ function canRequest(feature) {
     }
 
     throw new ForbiddenError({
-      message: `You don't have permission to perform this action`,
-      action: `Check if the user has the required feature ${feature}`,
+      message: `You don't have permission to perform this action.`,
+      action: `Check if the user has the required feature ${feature}.`,
     });
   };
 }
