@@ -79,7 +79,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       const sessionObject2 = await orchestrator.createSession(activatedUser2);
 
       var patchResponse = await fetch(
-        "http://localhost:3000/api/v1/users/user1",
+        "http://localhost:3000/api/v1/users/user2",
         {
           method: "PATCH",
           headers: {
@@ -87,7 +87,7 @@ describe("PATCH /api/v1/users/[username]", () => {
             Cookie: `session_id=${sessionObject2.token}`,
           },
           body: JSON.stringify({
-            username: "user2",
+            username: "user1",
           }),
         },
       );
@@ -100,6 +100,42 @@ describe("PATCH /api/v1/users/[username]", () => {
         message: "There is a user already registered with this user name.",
         action: "Please, use a different user name.",
         status_code: 400,
+      });
+    });
+
+    test("With 'userB' targeting 'userA'", async () => {
+      await orchestrator.createUser({
+        username: "userA",
+      });
+
+      const createdUserB = await orchestrator.createUser({
+        username: "userB",
+      });
+      const activatedUserB = await orchestrator.activateUser(createdUserB.id);
+      const sessionObject2 = await orchestrator.createSession(activatedUserB);
+
+      var patchResponse = await fetch(
+        "http://localhost:3000/api/v1/users/userA",
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Cookie: `session_id=${sessionObject2.token}`,
+          },
+          body: JSON.stringify({
+            username: "userC",
+          }),
+        },
+      );
+
+      expect(patchResponse.status).toBe(403);
+
+      var patchResponseBody = await patchResponse.json();
+      expect(patchResponseBody).toEqual({
+        name: "ForbiddenError",
+        message: "You don't have permission to update another user.",
+        action: "You don't have the feature to update another user.",
+        status_code: 403,
       });
     });
 
