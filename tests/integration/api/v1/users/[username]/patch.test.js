@@ -14,7 +14,7 @@ describe("PATCH /api/v1/users/[username]", () => {
     test("With unique 'username'", async () => {
       const userCreated = await orchestrator.createUser();
 
-      var patchResponse = await fetch(
+      const patchResponse = await fetch(
         `http://localhost:3000/api/v1/users/${userCreated.username}`,
         {
           method: "PATCH",
@@ -45,7 +45,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       const activatedUser = await orchestrator.activateUser(createdUser.id);
       const sessionObject = await orchestrator.createSession(activatedUser);
 
-      var response = await fetch(
+      const response = await fetch(
         "http://localhost:3000/api/v1/users/nonexistentuser",
         {
           method: "PATCH",
@@ -78,7 +78,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       const activatedUser2 = await orchestrator.activateUser(createdUser2.id);
       const sessionObject2 = await orchestrator.createSession(activatedUser2);
 
-      var patchResponse = await fetch(
+      const patchResponse = await fetch(
         "http://localhost:3000/api/v1/users/user2",
         {
           method: "PATCH",
@@ -94,7 +94,7 @@ describe("PATCH /api/v1/users/[username]", () => {
 
       expect(patchResponse.status).toBe(400);
 
-      var patchResponseBody = await patchResponse.json();
+      const patchResponseBody = await patchResponse.json();
       expect(patchResponseBody).toEqual({
         name: "ValidationError",
         message: "There is a user already registered with this user name.",
@@ -114,7 +114,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       const activatedUserB = await orchestrator.activateUser(createdUserB.id);
       const sessionObject2 = await orchestrator.createSession(activatedUserB);
 
-      var patchResponse = await fetch(
+      const patchResponse = await fetch(
         "http://localhost:3000/api/v1/users/userA",
         {
           method: "PATCH",
@@ -130,7 +130,7 @@ describe("PATCH /api/v1/users/[username]", () => {
 
       expect(patchResponse.status).toBe(403);
 
-      var patchResponseBody = await patchResponse.json();
+      const patchResponseBody = await patchResponse.json();
       expect(patchResponseBody).toEqual({
         name: "ForbiddenError",
         message: "You don't have permission to update another user.",
@@ -152,7 +152,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       );
       const sessionObject2 = await orchestrator.createSession(activatedUser2);
 
-      var patchResponse = await fetch(
+      const patchResponse = await fetch(
         `http://localhost:3000/api/v1/users/${email2UserCreated.username}`,
         {
           method: "PATCH",
@@ -168,7 +168,7 @@ describe("PATCH /api/v1/users/[username]", () => {
 
       expect(patchResponse.status).toBe(400);
 
-      var patchResponseBody = await patchResponse.json();
+      const patchResponseBody = await patchResponse.json();
       expect(patchResponseBody).toEqual({
         name: "ValidationError",
         message: "There is a user already registered with this email.",
@@ -182,7 +182,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       const activatedUser = await orchestrator.activateUser(userCreated.id);
       const sessionObject = await orchestrator.createSession(activatedUser);
 
-      var patchResponse = await fetch(
+      const patchResponse = await fetch(
         `http://localhost:3000/api/v1/users/${userCreated.username}`,
         {
           method: "PATCH",
@@ -202,9 +202,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       expect(responseBody).toEqual({
         id: responseBody.id,
         username: "uniqueUser2",
-        email: userCreated.email,
         features: ["create:session", "read:session", "update:user"],
-        password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
@@ -223,7 +221,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       const activatedUser = await orchestrator.activateUser(userCreated.id);
       const sessionObject = await orchestrator.createSession(activatedUser);
 
-      var patchResponse = await fetch(
+      const patchResponse = await fetch(
         `http://localhost:3000/api/v1/users/${userCreated.username}`,
         {
           method: "PATCH",
@@ -243,9 +241,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       expect(responseBody).toEqual({
         id: responseBody.id,
         username: userCreated.username,
-        email: "uniqueEmail2@test.com",
         features: ["create:session", "read:session", "update:user"],
-        password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
@@ -266,7 +262,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       const activatedUser = await orchestrator.activateUser(userCreated.id);
       const sessionObject = await orchestrator.createSession(activatedUser);
 
-      var patchResponse = await fetch(
+      const patchResponse = await fetch(
         `http://localhost:3000/api/v1/users/${userCreated.username}`,
         {
           method: "PATCH",
@@ -286,9 +282,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       expect(responseBody).toEqual({
         id: responseBody.id,
         username: userCreated.username,
-        email: userCreated.email,
         features: ["create:session", "read:session", "update:user"],
-        password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
@@ -335,7 +329,7 @@ describe("PATCH /api/v1/users/[username]", () => {
 
       const defaultUser = await orchestrator.createUser();
 
-      var patchResponse = await fetch(
+      const patchResponse = await fetch(
         `http://localhost:3000/api/v1/users/${defaultUser.username}`,
         {
           method: "PATCH",
@@ -355,9 +349,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       expect(patchResponseBody).toEqual({
         id: defaultUser.id,
         username: "ChangedByPrivilegedUser",
-        email: defaultUser.email,
         features: defaultUser.features,
-        password: defaultUser.password,
         created_at: defaultUser.created_at.toISOString(),
         updated_at: patchResponseBody.updated_at,
       });

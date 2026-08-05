@@ -12,7 +12,7 @@ beforeAll(async () => {
 describe("POST /api/v1/user", () => {
   describe("Anonymous user", () => {
     test("With unique and valid data", async () => {
-      var response = await fetch("http://localhost:3000/api/v1/users", {
+      const response = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -30,9 +30,7 @@ describe("POST /api/v1/user", () => {
       expect(responseBody).toEqual({
         id: responseBody.id,
         username: "guilhermeforte",
-        email: "guilhermeforte@test.com",
         features: ["read:activation_token"],
-        password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
@@ -58,7 +56,7 @@ describe("POST /api/v1/user", () => {
     });
 
     test("With duplicated 'email'", async () => {
-      var response1 = await fetch("http://localhost:3000/api/v1/users", {
+      const response1 = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -72,7 +70,7 @@ describe("POST /api/v1/user", () => {
 
       expect(response1.status).toBe(201);
 
-      var response2 = await fetch("http://localhost:3000/api/v1/users", {
+      const response2 = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -85,7 +83,7 @@ describe("POST /api/v1/user", () => {
       });
 
       expect(response2.status).toBe(400);
-      var responseBody2 = await response2.json();
+      const responseBody2 = await response2.json();
       expect(responseBody2).toEqual({
         name: "ValidationError",
         message: "There is a user already registered with this email.",
@@ -95,7 +93,7 @@ describe("POST /api/v1/user", () => {
     });
 
     test("With duplicated 'username'", async () => {
-      var response1 = await fetch("http://localhost:3000/api/v1/users", {
+      const response1 = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,7 +107,7 @@ describe("POST /api/v1/user", () => {
 
       expect(response1.status).toBe(201);
 
-      var response2 = await fetch("http://localhost:3000/api/v1/users", {
+      const response2 = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -123,7 +121,7 @@ describe("POST /api/v1/user", () => {
 
       expect(response2.status).toBe(400);
 
-      var responseBody2 = await response2.json();
+      const responseBody2 = await response2.json();
       expect(responseBody2).toEqual({
         name: "ValidationError",
         message: "There is a user already registered with this user name.",
@@ -139,7 +137,7 @@ describe("POST /api/v1/user", () => {
       await orchestrator.activateUser(user1.id);
       const user1Session = await orchestrator.createSession(user1);
 
-      var user2Response = await fetch("http://localhost:3000/api/v1/users", {
+      const user2Response = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

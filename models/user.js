@@ -8,7 +8,7 @@ async function findOneByUserName(username) {
   return user;
 
   async function runSelectQuery(username) {
-    var result = await database.query({
+    const result = await database.query({
       text: `
         SELECT 
           *
@@ -40,7 +40,7 @@ async function findOneByEmail(email) {
   return user;
 
   async function runSelectQuery(email) {
-    var result = await database.query({
+    const result = await database.query({
       text: `
         SELECT 
           *
@@ -72,7 +72,7 @@ async function findOneById(id) {
   return user;
 
   async function runSelectQuery(id) {
-    var result = await database.query({
+    const result = await database.query({
       text: `
         SELECT 
           *
@@ -105,7 +105,7 @@ async function create(userInputValues) {
 
   injectDefaultFeaturesInObject(userInputValues);
 
-  var newUser = await runInsertUserQuery(userInputValues);
+  const newUser = await runInsertUserQuery(userInputValues);
 
   return newUser;
 
@@ -114,7 +114,7 @@ async function create(userInputValues) {
   }
 
   async function runInsertUserQuery(userInputValues) {
-    var results = await database.query({
+    const results = await database.query({
       text: `
         INSERT INTO 
           users (username, email, password, features) 
@@ -157,7 +157,7 @@ async function update(username, userInputValues) {
   return updatedUser;
 
   async function runUpdateQuery(mergedUser) {
-    var result = await database.query({
+    const result = await database.query({
       text: `
         UPDATE users
         SET
@@ -188,7 +188,7 @@ async function setFeatures(userId, features) {
   return updatedUser;
 
   async function runUpdateQuery(userId, features) {
-    var result = await database.query({
+    const result = await database.query({
       text: `
         UPDATE users
         SET
@@ -212,7 +212,7 @@ async function addFeatures(userId, features) {
   return updatedUser;
 
   async function runUpdateQuery(userId, features) {
-    var result = await database.query({
+    const result = await database.query({
       text: `
         UPDATE users
         SET
@@ -232,7 +232,7 @@ async function addFeatures(userId, features) {
 }
 
 async function validateUniqueUsername(username) {
-  var result = await database.query({
+  const result = await database.query({
     text: `
         SELECT 
           username
@@ -255,7 +255,7 @@ async function validateUniqueUsername(username) {
 }
 
 async function validateUniqueEmail(email) {
-  var result = await database.query({
+  const result = await database.query({
     text: `
         SELECT 
           email

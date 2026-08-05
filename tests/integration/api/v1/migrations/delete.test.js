@@ -7,7 +7,7 @@ beforeAll(async () => {
 describe("DELETE /api/v1/migration", () => {
   describe("Anonymous user", () => {
     test("Deleting pending migrations", async () => {
-      var response = await fetch("http://localhost:3000/api/v1/migrations", {
+      const response = await fetch("http://localhost:3000/api/v1/migrations", {
         method: "DELETE",
       });
       expect(response.status).toBe(405);

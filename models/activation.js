@@ -15,7 +15,7 @@ async function create(userId) {
   return newActivationToken;
 
   async function runInsertQuery(userId, expiresAt) {
-    var results = await database.query({
+    const results = await database.query({
       text: `
         INSERT INTO 
           user_activation_tokens (user_id, expires_at) 
@@ -38,7 +38,7 @@ async function findOneValidByActivationTokenId(token) {
   return activationToken;
 
   async function runSelectQuery(tokenId) {
-    var result = await database.query({
+    const result = await database.query({
       text: `
         SELECT 
           *
@@ -86,7 +86,7 @@ async function markTokenAsUsed(activationTokenId) {
   return activatedTokenObject;
 
   async function runUpdateQuery(activationTokenId) {
-    var result = await database.query({
+    const result = await database.query({
       text: `
         UPDATE 
           user_activation_tokens

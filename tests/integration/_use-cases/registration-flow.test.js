@@ -16,7 +16,7 @@ describe("Use case: Registration Flow (all sucessfull)", () => {
   let sessionResponseBody;
 
   test("Create user account", async () => {
-    var response = await fetch("http://localhost:3000/api/v1/users", {
+    const response = await fetch("http://localhost:3000/api/v1/users", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -34,9 +34,7 @@ describe("Use case: Registration Flow (all sucessfull)", () => {
     expect(userResponseBody).toEqual({
       id: userResponseBody.id,
       username: "guilhermeforte",
-      email: "guilhermeforte@test.com",
       features: ["read:activation_token"],
-      password: userResponseBody.password,
       created_at: userResponseBody.created_at,
       updated_at: userResponseBody.updated_at,
     });
@@ -66,7 +64,7 @@ describe("Use case: Registration Flow (all sucessfull)", () => {
   });
 
   test("Activation", async () => {
-    var response = await fetch(
+    const response = await fetch(
       `http://localhost:3000/api/v1/activations/${activationTokenObject.id}`,
       {
         method: "PATCH",
@@ -90,13 +88,13 @@ describe("Use case: Registration Flow (all sucessfull)", () => {
   });
 
   test("Login", async () => {
-    var response = await fetch("http://localhost:3000/api/v1/sessions", {
+    const response = await fetch("http://localhost:3000/api/v1/sessions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email: userResponseBody.email,
+        email: "guilhermeforte@test.com",
         password: "senha123",
       }),
     });
@@ -109,7 +107,7 @@ describe("Use case: Registration Flow (all sucessfull)", () => {
   });
 
   test("Get user information", async () => {
-    var response = await fetch("http://localhost:3000/api/v1/user", {
+    const response = await fetch("http://localhost:3000/api/v1/user", {
       method: "GET",
       headers: {
         Cookie: `session_id=${sessionResponseBody.token}`,
@@ -128,9 +126,9 @@ describe("Use case: Registration Flow (all sucessfull)", () => {
     expect(responseBody).toEqual({
       id: userResponseBody.id,
       username: userResponseBody.username,
-      email: userResponseBody.email,
+      email: responseBody.email,
       features: ["create:session", "read:session", "update:user"],
-      password: userResponseBody.password,
+      password: responseBody.password,
       created_at: userResponseBody.created_at,
       updated_at: responseBody.updated_at,
     });

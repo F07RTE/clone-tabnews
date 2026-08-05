@@ -12,7 +12,7 @@ beforeAll(async () => {
 describe("GET /api/v1/users/[username]", () => {
   describe("Anonymous user", () => {
     test("With nonexistent token", async () => {
-      var response = await fetch(
+      const response = await fetch(
         `http://localhost:3000/api/v1/activations/eaf5e5b7-182e-438d-9310-6b0bc212d3c4`,
         {
           method: "PATCH",
@@ -41,7 +41,7 @@ describe("GET /api/v1/users/[username]", () => {
 
       jest.useRealTimers();
 
-      var response = await fetch(
+      const response = await fetch(
         `http://localhost:3000/api/v1/activations/${expiredActivationToken.id}`,
         {
           method: "PATCH",
@@ -64,7 +64,7 @@ describe("GET /api/v1/users/[username]", () => {
       const createdUser = await orchestrator.createUser();
       const createdActivationToken = await activation.create(createdUser.id);
 
-      var response = await fetch(
+      const response = await fetch(
         `http://localhost:3000/api/v1/activations/${createdActivationToken.id}`,
         {
           method: "PATCH",
@@ -73,7 +73,7 @@ describe("GET /api/v1/users/[username]", () => {
 
       expect(response.status).toBe(200);
 
-      var secondActivationResponse = await fetch(
+      const secondActivationResponse = await fetch(
         `http://localhost:3000/api/v1/activations/${createdActivationToken.id}`,
         {
           method: "PATCH",
@@ -98,7 +98,7 @@ describe("GET /api/v1/users/[username]", () => {
       const createdUser = await orchestrator.createUser();
       const createdActivationToken = await activation.create(createdUser.id);
 
-      var response = await fetch(
+      const response = await fetch(
         `http://localhost:3000/api/v1/activations/${createdActivationToken.id}`,
         {
           method: "PATCH",
@@ -146,7 +146,7 @@ describe("GET /api/v1/users/[username]", () => {
       await orchestrator.activateUser(createdUser.id);
       const createdActivationToken = await activation.create(createdUser.id);
 
-      var response = await fetch(
+      const response = await fetch(
         `http://localhost:3000/api/v1/activations/${createdActivationToken.id}`,
         {
           method: "PATCH",
@@ -174,7 +174,7 @@ describe("GET /api/v1/users/[username]", () => {
       const user2 = await orchestrator.createUser();
       const user2ActivationToken = await activation.create(user2.id);
 
-      var response = await fetch(
+      const response = await fetch(
         `http://localhost:3000/api/v1/activations/${user2ActivationToken.id}`,
         {
           method: "PATCH",
