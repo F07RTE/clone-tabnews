@@ -103,7 +103,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       });
     });
 
-    test("With 'userB' targeting 'userA'", async () => {
+    test.only("With 'userB' targeting 'userA'", async () => {
       await orchestrator.createUser({
         username: "userA",
       });

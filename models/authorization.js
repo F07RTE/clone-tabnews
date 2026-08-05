@@ -1,4 +1,33 @@
+import { InternalServerError } from "infra/errors";
+
+const avalibleFeatures = [
+  // USER
+  "create:user",
+  "read:user",
+  "read:user:self",
+  "update:user",
+  "update:user:others",
+
+  // SESSION
+  "create:session",
+  "read:session",
+
+  // ACTIVATION_TOKEN
+  "read:activation_token",
+
+  // MIGRATION
+  "create:migration",
+  "read:migration",
+
+  // STATUS
+  "read:status",
+  "read:status:all",
+];
+
 function can(user, feature, resource) {
+  validateUser(user);
+  validateFeature(feature);
+
   let authorize = false;
 
   if (user.features.includes(feature)) {
@@ -17,6 +46,10 @@ function can(user, feature, resource) {
 }
 
 function filterOutput(user, feature, resource) {
+  validateUser(user);
+  validateFeature(feature);
+  validateResource(resource);
+
   if (feature === "read:user") {
     return {
       id: resource.id,
@@ -88,6 +121,30 @@ function filterOutput(user, feature, resource) {
     }
 
     return output;
+  }
+}
+
+function validateUser(user) {
+  if (!user || !user.features) {
+    throw new InternalServerError({
+      cause: "The `user` is required on `authorization` model.",
+    });
+  }
+}
+
+function validateFeature(feature) {
+  if (!feature || !avalibleFeatures.includes(feature)) {
+    throw new InternalServerError({
+      cause: "You must provide a known feature on `authorization` model.",
+    });
+  }
+}
+
+function validateResource(resource) {
+  if (!resource) {
+    throw new InternalServerError({
+      cause: "You must provide a resource on `authorization` model.",
+    });
   }
 }
 
