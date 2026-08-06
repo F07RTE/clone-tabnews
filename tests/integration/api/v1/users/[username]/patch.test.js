@@ -103,7 +103,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       });
     });
 
-    test.only("With 'userB' targeting 'userA'", async () => {
+    test("With 'userB' targeting 'userA'", async () => {
       await orchestrator.createUser({
         username: "userA",
       });
@@ -319,7 +319,7 @@ describe("PATCH /api/v1/users/[username]", () => {
         privilegedUser.id,
       );
 
-      const test = await orchestrator.addFeaturesToUser(privilegedUser, [
+      await orchestrator.addFeaturesToUser(privilegedUser, [
         "update:user:others",
       ]);
 

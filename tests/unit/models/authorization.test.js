@@ -3,7 +3,7 @@ import authorization from "models/authorization.js";
 
 describe("models/authorization.js", () => {
   describe(".can", () => {
-    test("Without `user` ", () => {
+    test("Without `user`", () => {
       expect(() => {
         authorization.can();
       }).toThrow(InternalServerError);
@@ -39,7 +39,7 @@ describe("models/authorization.js", () => {
   });
 
   describe(".filterOutput", () => {
-    test("Without `user` ", () => {
+    test("Without `user`", () => {
       expect(() => {
         authorization.filterOutput();
       }).toThrow(InternalServerError);
