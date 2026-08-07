@@ -11,7 +11,7 @@ beforeAll(async () => {
 
 describe("PATCH /api/v1/users/[username]", () => {
   describe("Anonymous user", () => {
-    test("With unique 'username'", async () => {
+    test("With unique `username`", async () => {
       const userCreated = await orchestrator.createUser();
 
       const patchResponse = await fetch(
@@ -32,7 +32,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       const responseBody = await patchResponse.json();
       expect(responseBody).toEqual({
         action: "Check if the user has the required feature update:user.",
-        message: "You don't have permission to perform this action.",
+        message: "You do not have permission to perform this action.",
         name: "ForbiddenError",
         status_code: 403,
       });
@@ -40,7 +40,7 @@ describe("PATCH /api/v1/users/[username]", () => {
   });
 
   describe("Default user", () => {
-    test("With nonexistent 'username'", async () => {
+    test("With nonexistent `username`", async () => {
       const createdUser = await orchestrator.createUser();
       const activatedUser = await orchestrator.activateUser(createdUser.id);
       const sessionObject = await orchestrator.createSession(activatedUser);
@@ -67,7 +67,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       });
     });
 
-    test("With duplicated 'username'", async () => {
+    test("With duplicated `username`", async () => {
       await orchestrator.createUser({
         username: "user1",
       });
@@ -103,7 +103,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       });
     });
 
-    test("With 'userB' targeting 'userA'", async () => {
+    test("With `userB` targeting `userA`", async () => {
       await orchestrator.createUser({
         username: "userA",
       });
@@ -133,13 +133,13 @@ describe("PATCH /api/v1/users/[username]", () => {
       const patchResponseBody = await patchResponse.json();
       expect(patchResponseBody).toEqual({
         name: "ForbiddenError",
-        message: "You don't have permission to update another user.",
-        action: "You don't have the feature to update another user.",
+        message: "You do not have permission to update another user.",
+        action: "You do not have the feature to update another user.",
         status_code: 403,
       });
     });
 
-    test("With duplicated 'email'", async () => {
+    test("With duplicated `email`", async () => {
       await orchestrator.createUser({
         email: "email1@test.com",
       });
@@ -177,7 +177,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       });
     });
 
-    test("With unique 'username'", async () => {
+    test("With unique `username`", async () => {
       const userCreated = await orchestrator.createUser();
       const activatedUser = await orchestrator.activateUser(userCreated.id);
       const sessionObject = await orchestrator.createSession(activatedUser);
@@ -216,7 +216,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       ).toBe(true);
     });
 
-    test("With unique 'email'", async () => {
+    test("With unique `email`", async () => {
       const userCreated = await orchestrator.createUser();
       const activatedUser = await orchestrator.activateUser(userCreated.id);
       const sessionObject = await orchestrator.createSession(activatedUser);
@@ -255,7 +255,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       ).toBe(true);
     });
 
-    test("With new 'password'", async () => {
+    test("With new `password`", async () => {
       const userCreated = await orchestrator.createUser({
         password: "password1",
       });

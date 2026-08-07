@@ -38,8 +38,8 @@ async function patchHandler(request, response) {
 
   if (!authorization.can(userTryingToPatch, "update:user", targetUser)) {
     throw new ForbiddenError({
-      message: "You don't have permission to update another user.",
-      action: "You don't have the feature to update another user.",
+      message: "You do not have permission to update another user.",
+      action: "You do not have the feature to update another user.",
     });
   }
 

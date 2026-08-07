@@ -25,7 +25,7 @@ async function postHandler(request, response) {
 
   if (!authorization.can(autheticatedUser, "create:session")) {
     throw new ForbiddenError({
-      message: `You don't have permission to perform this action`,
+      message: `You do not have permission to perform this action`,
       action: `Contact the support if you should have access to this feature.`,
     });
   }
