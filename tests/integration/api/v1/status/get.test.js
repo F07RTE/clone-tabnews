@@ -20,7 +20,7 @@ describe("GET /api/v1/status", () => {
 
       expect(responseBody.updated_at).toEqual(updatedAt);
 
-      expect(responseBody.dependencies.database.version).toBeUndefined();
+      expect(responseBody.dependencies.database).not.toHaveProperty("version");
       expect(responseBody.dependencies.database.max_connections).toEqual(100);
       expect(responseBody.dependencies.database.opened_connections).toEqual(1);
     });
@@ -45,7 +45,7 @@ describe("GET /api/v1/status", () => {
 
       expect(responseBody.updated_at).toEqual(updatedAt);
 
-      expect(responseBody.dependencies.database.version).toBeUndefined();
+      expect(responseBody.dependencies.database).not.toHaveProperty("version");
       expect(responseBody.dependencies.database.max_connections).toEqual(100);
       expect(responseBody.dependencies.database.opened_connections).toEqual(1);
     });
