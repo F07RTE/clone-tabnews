@@ -45,7 +45,7 @@ describe("GET /api/v1/user", () => {
         features: ["read:user"],
       });
 
-      const activatedUser = await orchestrator.activateUser(createdUser.id);
+      const activatedUser = await orchestrator.activateUser(createdUser);
 
       const createdSession = await orchestrator.createSession(createdUser);
 
@@ -117,7 +117,7 @@ describe("GET /api/v1/user", () => {
         username: "UserWithSessionAboutToExpire",
       });
 
-      const activatedUser = await orchestrator.activateUser(createdUser.id);
+      const activatedUser = await orchestrator.activateUser(createdUser);
 
       const createdSession = await orchestrator.createSession(createdUser);
 

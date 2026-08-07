@@ -48,7 +48,7 @@ describe("GET /api/v1/migration", () => {
     describe("Retrieving pending migrations", () => {
       test("With `read:migration` feature", async () => {
         const createdUser = await orchestrator.createUser();
-        const activatedUser = await orchestrator.activateUser(createdUser.id);
+        const activatedUser = await orchestrator.activateUser(createdUser);
         await orchestrator.addFeaturesToUser(createdUser, ["read:migration"]);
         const userSessionObject =
           await orchestrator.createSession(activatedUser);

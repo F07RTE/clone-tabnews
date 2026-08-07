@@ -55,7 +55,7 @@ describe("POST /api/v1/migration", () => {
 
         test("For the first time", async () => {
           const createdUser = await orchestrator.createUser();
-          const activatedUser = await orchestrator.activateUser(createdUser.id);
+          const activatedUser = await orchestrator.activateUser(createdUser);
           await orchestrator.addFeaturesToUser(createdUser, [
             "create:migration",
             "read:migration",

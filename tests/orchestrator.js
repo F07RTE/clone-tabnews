@@ -60,8 +60,8 @@ async function createUser(userObject) {
   });
 }
 
-async function activateUser(userId) {
-  return await activation.activateUserByUserId(userId);
+async function activateUser(userObject) {
+  return await activation.activateUserByUserId(userObject.id);
 }
 
 async function createSession(autheticatedUser) {

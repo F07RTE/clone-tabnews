@@ -145,7 +145,7 @@ describe("GET /api/v1/users/[username]", () => {
 
     test("With valid token, but already activated user", async () => {
       const createdUser = await orchestrator.createUser();
-      await orchestrator.activateUser(createdUser.id);
+      await orchestrator.activateUser(createdUser);
       const createdActivationToken = await activation.create(createdUser.id);
 
       const response = await fetch(
@@ -170,7 +170,7 @@ describe("GET /api/v1/users/[username]", () => {
   describe("Default user", () => {
     test("With valid token, but already logged user", async () => {
       const user1 = await orchestrator.createUser();
-      await orchestrator.activateUser(user1.id);
+      await orchestrator.activateUser(user1);
       const user1Session = await orchestrator.createSession(user1);
 
       const user2 = await orchestrator.createUser();
