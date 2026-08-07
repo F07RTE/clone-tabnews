@@ -1,25 +1,55 @@
 import { createRouter } from "next-connect";
+
 import controller from "infra/controller";
+import { ForbiddenError } from "infra/errors.js";
 import user from "models/user.js";
+import authorization from "models/authorization.js";
 
 const router = createRouter();
 
+router.use(controller.injectAnnonymousOrUser);
+
 router.get(getHandler);
-router.patch(patchHandler);
+router.patch(controller.canRequest("update:user"), patchHandler);
 
 export default router.handler(controller.errorHandlers);
 
 async function getHandler(request, response) {
+  const userTryingToGet = request.context.user;
   const username = request.query.username;
-  let result = await user.findOneByUserName(username);
-  return response.status(200).json(result);
+  const userFound = await user.findOneByUserName(username);
+
+  const secureOutputValues = authorization.filterOutput(
+    userTryingToGet,
+    "read:user",
+    userFound,
+  );
+
+  return response.status(200).json(secureOutputValues);
 }
 
 async function patchHandler(request, response) {
   const username = request.query.username;
   const userInputValue = request.body;
 
-  const result = await user.update(username, userInputValue);
+  const userTryingToPatch = request.context.user;
 
-  return response.status(200).json(result);
+  const targetUser = await user.findOneByUserName(username);
+
+  if (!authorization.can(userTryingToPatch, "update:user", targetUser)) {
+    throw new ForbiddenError({
+      message: "You don't have permission to update another user.",
+      action: "You don't have the feature to update another user.",
+    });
+  }
+
+  const updatedUser = await user.update(username, userInputValue);
+
+  const secureOutputValues = authorization.filterOutput(
+    userTryingToPatch,
+    "read:user",
+    updatedUser,
+  );
+
+  return response.status(200).json(secureOutputValues);
 }

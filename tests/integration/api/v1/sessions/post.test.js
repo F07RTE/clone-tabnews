@@ -17,7 +17,7 @@ describe("POST /api/v1/user", () => {
         password: "CorrectPassword",
       });
 
-      var response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch("http://localhost:3000/api/v1/sessions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,7 +45,7 @@ describe("POST /api/v1/user", () => {
         password: "CorrectPassword",
       });
 
-      var response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch("http://localhost:3000/api/v1/sessions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,7 +71,7 @@ describe("POST /api/v1/user", () => {
     test("With incorrect `email` and incorrect `password`", async () => {
       await orchestrator.createUser();
 
-      var response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch("http://localhost:3000/api/v1/sessions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -100,7 +100,9 @@ describe("POST /api/v1/user", () => {
         password: "CorrectPassword",
       });
 
-      var response = await fetch("http://localhost:3000/api/v1/sessions", {
+      await orchestrator.activateUser(createdUser.id);
+
+      const response = await fetch("http://localhost:3000/api/v1/sessions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

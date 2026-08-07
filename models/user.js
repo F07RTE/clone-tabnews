@@ -8,7 +8,7 @@ async function findOneByUserName(username) {
   return user;
 
   async function runSelectQuery(username) {
-    var result = await database.query({
+    const result = await database.query({
       text: `
         SELECT 
           *
@@ -40,7 +40,7 @@ async function findOneByEmail(email) {
   return user;
 
   async function runSelectQuery(email) {
-    var result = await database.query({
+    const result = await database.query({
       text: `
         SELECT 
           *
@@ -72,7 +72,7 @@ async function findOneById(id) {
   return user;
 
   async function runSelectQuery(id) {
-    var result = await database.query({
+    const result = await database.query({
       text: `
         SELECT 
           *
@@ -103,17 +103,23 @@ async function create(userInputValues) {
   await validateUniqueEmail(userInputValues.email);
   await hashPasswordInObject(userInputValues);
 
-  var newUser = await runInsertUserQuery(userInputValues);
+  injectDefaultFeaturesInObject(userInputValues);
+
+  const newUser = await runInsertUserQuery(userInputValues);
 
   return newUser;
 
+  async function injectDefaultFeaturesInObject(userInputValues) {
+    userInputValues.features = ["read:activation_token"];
+  }
+
   async function runInsertUserQuery(userInputValues) {
-    var results = await database.query({
+    const results = await database.query({
       text: `
         INSERT INTO 
-          users (username, email, password) 
+          users (username, email, password, features) 
         VALUES 
-          ($1, $2, $3)
+          ($1, $2, $3, $4)
         RETURNING
           *
           ;
@@ -122,6 +128,7 @@ async function create(userInputValues) {
         userInputValues.username,
         userInputValues.email,
         userInputValues.password,
+        userInputValues.features,
       ],
     });
 
@@ -150,7 +157,7 @@ async function update(username, userInputValues) {
   return updatedUser;
 
   async function runUpdateQuery(mergedUser) {
-    var result = await database.query({
+    const result = await database.query({
       text: `
         UPDATE users
         SET
@@ -176,8 +183,56 @@ async function update(username, userInputValues) {
   }
 }
 
+async function setFeatures(userId, features) {
+  const updatedUser = await runUpdateQuery(userId, features);
+  return updatedUser;
+
+  async function runUpdateQuery(userId, features) {
+    const result = await database.query({
+      text: `
+        UPDATE users
+        SET
+          features = $2,
+          updated_at = timezone('utc', now()) 
+        WHERE 
+          id = $1
+
+        RETURNING
+          *
+      `,
+      values: [userId, features],
+    });
+
+    return result.rows[0];
+  }
+}
+
+async function addFeatures(userId, features) {
+  const updatedUser = await runUpdateQuery(userId, features);
+  return updatedUser;
+
+  async function runUpdateQuery(userId, features) {
+    const result = await database.query({
+      text: `
+        UPDATE users
+        SET
+          features = array_cat(features, $2),
+          updated_at = timezone('utc', now()) 
+        WHERE 
+          id = $1
+
+        RETURNING
+          *
+      `,
+      values: [userId, features],
+    });
+
+    return result.rows[0];
+  }
+}
+
 async function validateUniqueUsername(username) {
-  var result = await database.query({
+  const result = await database.query({
     text: `
         SELECT 
           username
@@ -200,7 +255,7 @@ async function validateUniqueUsername(username) {
 }
 
 async function validateUniqueEmail(email) {
-  var result = await database.query({
+  const result = await database.query({
     text: `
         SELECT 
           email
@@ -241,6 +296,8 @@ const user = {
   findOneById,
   create,
   update,
+  setFeatures,
+  addFeatures,
 };
 
 export default user;

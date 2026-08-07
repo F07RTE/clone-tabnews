@@ -3,13 +3,14 @@ import { resolve } from "node:path";
 import database from "infra/database.js";
 import { ServiceError } from "infra/errors";
 
-function createDefaultMigrationOptions(dbClient) {
+function createDefaultMigrationOptions(dbClient, migrationsCount = undefined) {
   return {
     dbClient: dbClient,
     dir: resolve("infra", "migrations"),
     direction: "up",
     log: () => {},
     migrationsTable: "pgmigrations",
+    count: migrationsCount,
   };
 }
 
@@ -35,10 +36,13 @@ async function listPendingMigrations() {
   }
 }
 
-async function runPendingMigrations() {
+async function runPendingMigrations(migrationsCount = undefined) {
   try {
     var dbClient = await database.getNewClient();
-    var defaultMigrationOptions = createDefaultMigrationOptions(dbClient);
+    var defaultMigrationOptions = createDefaultMigrationOptions(
+      dbClient,
+      migrationsCount,
+    );
 
     var migratedMigrations = await migrationsRunner({
       ...defaultMigrationOptions,

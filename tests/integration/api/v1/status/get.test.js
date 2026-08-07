@@ -2,22 +2,82 @@ import orchestrator from "tests/orchestrator";
 
 beforeAll(async () => {
   await orchestrator.waitForAllServices();
+  await orchestrator.clearDatabase();
+  await orchestrator.runPendingMigrations();
 });
 
 describe("GET /api/v1/status", () => {
   describe("Anonymous user", () => {
     test("Retrieving current system status", async () => {
-      var response = await fetch("http://localhost:3000/api/v1/status");
+      const response = await fetch("http://localhost:3000/api/v1/status");
+
       expect(response.status).toBe(200);
 
-      var responseBody = await response.json();
+      const responseBody = await response.json();
 
-      var updatedAt = new Date(responseBody.updated_at).toISOString();
+      const updatedAt = new Date(responseBody.updated_at).toISOString();
+
       expect(responseBody.updated_at).toEqual(updatedAt);
 
-      expect(responseBody.dependencies.database.version).toEqual("16.0");
+      expect(responseBody.dependencies.database.version).toBeUndefined();
       expect(responseBody.dependencies.database.max_connections).toEqual(100);
       expect(responseBody.dependencies.database.opened_connections).toEqual(1);
+    });
+  });
+
+  describe("Default user", () => {
+    test("Retrieving current system status", async () => {
+      const createdUser = await orchestrator.createUser();
+      await orchestrator.activateUser(createdUser.id);
+      const sessionObject = await orchestrator.createSession(createdUser);
+
+      const response = await fetch("http://localhost:3000/api/v1/status", {
+        headers: {
+          Cookie: `session_id=${sessionObject.token}`,
+        },
+      });
+      expect(response.status).toBe(200);
+
+      const responseBody = await response.json();
+
+      const updatedAt = new Date(responseBody.updated_at).toISOString();
+
+      expect(responseBody.updated_at).toEqual(updatedAt);
+
+      expect(responseBody.dependencies.database.version).toBeUndefined();
+      expect(responseBody.dependencies.database.max_connections).toEqual(100);
+      expect(responseBody.dependencies.database.opened_connections).toEqual(1);
+    });
+  });
+
+  describe("Privileged user", () => {
+    describe("Retrieving current system status", () => {
+      test("With `read:status:all` feature", async () => {
+        const createdUser = await orchestrator.createUser();
+        await orchestrator.activateUser(createdUser.id);
+        const updatedUser = await orchestrator.addFeaturesToUser(createdUser, [
+          "read:status:all",
+        ]);
+        const sessionObject = await orchestrator.createSession(updatedUser);
+
+        const response = await fetch("http://localhost:3000/api/v1/status", {
+          headers: {
+            Cookie: `session_id=${sessionObject.token}`,
+          },
+        });
+        expect(response.status).toBe(200);
+
+        const responseBody = await response.json();
+
+        const updatedAt = new Date(responseBody.updated_at).toISOString();
+        expect(responseBody.updated_at).toEqual(updatedAt);
+
+        expect(responseBody.dependencies.database.version).toEqual("16.0");
+        expect(responseBody.dependencies.database.max_connections).toEqual(100);
+        expect(responseBody.dependencies.database.opened_connections).toEqual(
+          1,
+        );
+      });
     });
   });
 });

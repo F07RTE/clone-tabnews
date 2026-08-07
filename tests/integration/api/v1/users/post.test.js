@@ -12,7 +12,7 @@ beforeAll(async () => {
 describe("POST /api/v1/user", () => {
   describe("Anonymous user", () => {
     test("With unique and valid data", async () => {
-      var response = await fetch("http://localhost:3000/api/v1/users", {
+      const response = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -30,8 +30,7 @@ describe("POST /api/v1/user", () => {
       expect(responseBody).toEqual({
         id: responseBody.id,
         username: "guilhermeforte",
-        email: "guilhermeforte@test.com",
-        password: responseBody.password,
+        features: ["read:activation_token"],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
@@ -57,7 +56,7 @@ describe("POST /api/v1/user", () => {
     });
 
     test("With duplicated 'email'", async () => {
-      var response1 = await fetch("http://localhost:3000/api/v1/users", {
+      const response1 = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,7 +70,7 @@ describe("POST /api/v1/user", () => {
 
       expect(response1.status).toBe(201);
 
-      var response2 = await fetch("http://localhost:3000/api/v1/users", {
+      const response2 = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -84,7 +83,7 @@ describe("POST /api/v1/user", () => {
       });
 
       expect(response2.status).toBe(400);
-      var responseBody2 = await response2.json();
+      const responseBody2 = await response2.json();
       expect(responseBody2).toEqual({
         name: "ValidationError",
         message: "There is a user already registered with this email.",
@@ -94,7 +93,7 @@ describe("POST /api/v1/user", () => {
     });
 
     test("With duplicated 'username'", async () => {
-      var response1 = await fetch("http://localhost:3000/api/v1/users", {
+      const response1 = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -108,7 +107,7 @@ describe("POST /api/v1/user", () => {
 
       expect(response1.status).toBe(201);
 
-      var response2 = await fetch("http://localhost:3000/api/v1/users", {
+      const response2 = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -122,12 +121,43 @@ describe("POST /api/v1/user", () => {
 
       expect(response2.status).toBe(400);
 
-      var responseBody2 = await response2.json();
+      const responseBody2 = await response2.json();
       expect(responseBody2).toEqual({
         name: "ValidationError",
         message: "There is a user already registered with this user name.",
         action: "Please, use a different user name.",
         status_code: 400,
+      });
+    });
+  });
+
+  describe("Default user", () => {
+    test("With unique and valid data", async () => {
+      const user1 = await orchestrator.createUser();
+      await orchestrator.activateUser(user1.id);
+      const user1Session = await orchestrator.createSession(user1);
+
+      const user2Response = await fetch("http://localhost:3000/api/v1/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: `session_id=${user1Session.token}`,
+        },
+        body: JSON.stringify({
+          username: "usuariologado",
+          email: "usuariologado@test.com",
+          password: "senha123",
+        }),
+      });
+
+      expect(user2Response.status).toBe(403);
+      const responseBody = await user2Response.json();
+
+      expect(responseBody).toEqual({
+        name: "ForbiddenError",
+        message: "You don't have permission to perform this action.",
+        action: "Check if the user has the required feature create:user.",
+        status_code: 403,
       });
     });
   });

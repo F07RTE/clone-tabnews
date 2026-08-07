@@ -11,15 +11,44 @@ beforeAll(async () => {
 });
 
 describe("GET /api/v1/user", () => {
+  describe("Annonymous user", () => {
+    test("Retrieve the endpoint", async () => {
+      const createdUser = await orchestrator.createUser();
+
+      const createdSession = await orchestrator.createSession(createdUser);
+
+      const response = await fetch("http://localhost:3000/api/v1/user", {
+        method: "GET",
+        headers: {
+          Cookie: `session_id=${createdSession.token}`,
+        },
+      });
+
+      expect(response.status).toBe(403);
+
+      const responseBody = await response.json();
+
+      expect(responseBody).toEqual({
+        name: "ForbiddenError",
+        message: "You don't have permission to perform this action.",
+        action: "Check if the user has the required feature read:session.",
+        status_code: 403,
+      });
+    });
+  });
+
   describe("Default user", () => {
     test("With a valid session", async () => {
       const createdUser = await orchestrator.createUser({
         username: "UserWithValidSession",
+        features: ["read:user"],
       });
+
+      const activatedUser = await orchestrator.activateUser(createdUser.id);
 
       const createdSession = await orchestrator.createSession(createdUser);
 
-      var response = await fetch("http://localhost:3000/api/v1/user", {
+      const response = await fetch("http://localhost:3000/api/v1/user", {
         method: "GET",
         headers: {
           Cookie: `session_id=${createdSession.token}`,
@@ -39,9 +68,9 @@ describe("GET /api/v1/user", () => {
         id: responseBody.id,
         username: "UserWithValidSession",
         email: createdUser.email,
-        password: createdUser.password,
+        features: ["create:session", "read:session", "update:user"],
         created_at: createdUser.created_at.toISOString(),
-        updated_at: createdUser.updated_at.toISOString(),
+        updated_at: activatedUser.updated_at.toISOString(),
       });
 
       expect(uuidVersion(responseBody.id)).toBe(4);
@@ -87,11 +116,13 @@ describe("GET /api/v1/user", () => {
         username: "UserWithSessionAboutToExpire",
       });
 
+      const activatedUser = await orchestrator.activateUser(createdUser.id);
+
       const createdSession = await orchestrator.createSession(createdUser);
 
       jest.useRealTimers();
 
-      var response = await fetch("http://localhost:3000/api/v1/user", {
+      const response = await fetch("http://localhost:3000/api/v1/user", {
         method: "GET",
         headers: {
           Cookie: `session_id=${createdSession.token}`,
@@ -106,9 +137,9 @@ describe("GET /api/v1/user", () => {
         id: responseBody.id,
         username: "UserWithSessionAboutToExpire",
         email: createdUser.email,
-        password: createdUser.password,
+        features: ["create:session", "read:session", "update:user"],
         created_at: createdUser.created_at.toISOString(),
-        updated_at: createdUser.updated_at.toISOString(),
+        updated_at: activatedUser.updated_at.toISOString(),
       });
 
       // Renewed Session Assertions
@@ -141,7 +172,7 @@ describe("GET /api/v1/user", () => {
       const nonexistentToken =
         "6ebfcbaf2ffb578bc19b43c31feb24ffae7e5fd47394d0998e9b8a6fe96310169f5d91ad5f6bc09027c0fa54c20a760e";
 
-      var response = await fetch("http://localhost:3000/api/v1/user", {
+      const response = await fetch("http://localhost:3000/api/v1/user", {
         method: "GET",
         headers: {
           Cookie: `session_id=${nonexistentToken}`,
@@ -186,7 +217,7 @@ describe("GET /api/v1/user", () => {
 
       jest.useRealTimers();
 
-      var response = await fetch("http://localhost:3000/api/v1/user", {
+      const response = await fetch("http://localhost:3000/api/v1/user", {
         method: "GET",
         headers: {
           Cookie: `session_id=${createdSession.token}`,

@@ -17,7 +17,7 @@ async function create(authenticatedUser) {
   return newSession;
 
   async function runInsertQuery(token, userId, expiresAt) {
-    var results = await database.query({
+    const results = await database.query({
       text: `
         INSERT INTO 
           sessions (token, user_id, expires_at) 
@@ -41,7 +41,7 @@ async function renew(sessionId) {
   return renewedSession;
 
   async function runUpdateQuery(sessionId, expiresAt) {
-    var results = await database.query({
+    const results = await database.query({
       text: `
         UPDATE 
           sessions 
@@ -67,7 +67,7 @@ async function expireById(sessionId) {
   return expiredSessionObject;
 
   async function runUpdateQuery(sessionId) {
-    var results = await database.query({
+    const results = await database.query({
       text: `
         UPDATE 
           sessions 
@@ -93,7 +93,7 @@ async function findOneValidByToken(token) {
   return validSession;
 
   async function runSelectQuery(token) {
-    var result = await database.query({
+    const result = await database.query({
       text: `
         SELECT 
           *

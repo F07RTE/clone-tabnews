@@ -1,6 +1,8 @@
 import * as cookie from "cookie";
 
 import session from "models/session.js";
+import user from "models/user.js";
+import authorization from "models/authorization.js";
 
 const {
   InternalServerError,
@@ -8,6 +10,7 @@ const {
   ValidationError,
   NotFoundError,
   UnauthorizedError,
+  ForbiddenError,
 } = require("infra/errors.js");
 
 function onNoMatchHandler(_request, response) {
@@ -17,7 +20,11 @@ function onNoMatchHandler(_request, response) {
 }
 
 function onErrorHandler(error, _request, response) {
-  if (error instanceof ValidationError || error instanceof NotFoundError) {
+  if (
+    error instanceof ValidationError ||
+    error instanceof NotFoundError ||
+    error instanceof ForbiddenError
+  ) {
     return response.status(error.statusCode).json(error);
   }
 
@@ -55,6 +62,53 @@ function clearSessionCookie(response) {
   response.setHeader("Set-Cookie", setCookie);
 }
 
+async function injectAnnonymousOrUser(request, response, next) {
+  if (request.cookies?.session_id) {
+    await injectAuthenticatedUser(request);
+    return next();
+  }
+
+  await injectAnnonymousUser(request);
+  return next();
+}
+
+async function injectAuthenticatedUser(request) {
+  const sessionToken = request.cookies.session_id;
+  const sessionObject = await session.findOneValidByToken(sessionToken);
+  const userObject = await user.findOneById(sessionObject.user_id);
+
+  request.context = {
+    ...request.context,
+    user: userObject,
+  };
+}
+
+async function injectAnnonymousUser(request) {
+  const annonymousUserObject = {
+    features: ["read:activation_token", "create:session", "create:user"],
+  };
+
+  request.context = {
+    ...request.context,
+    user: annonymousUserObject,
+  };
+}
+
+function canRequest(feature) {
+  return function canRequestMiddleware(request, response, next) {
+    const userTryingToRequest = request.context.user;
+
+    if (authorization.can(userTryingToRequest, feature)) {
+      return next();
+    }
+
+    throw new ForbiddenError({
+      message: `You don't have permission to perform this action.`,
+      action: `Check if the user has the required feature ${feature}.`,
+    });
+  };
+}
+
 const controller = {
   errorHandlers: {
     onNoMatch: onNoMatchHandler,
@@ -62,6 +116,8 @@ const controller = {
   },
   setSessionCookie,
   clearSessionCookie,
+  injectAnnonymousOrUser,
+  canRequest,
 };
 
 export default controller;

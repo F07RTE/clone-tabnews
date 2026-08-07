@@ -15,7 +15,7 @@ describe("GET /api/v1/user", () => {
       const nonexistentToken =
         "6ebfcbaf2ffb578bc19b43c31feb24ffae7e5fd47394d0998e9b8a6fe96310169f5d91ad5f6bc09027c0fa54c20a760e";
 
-      var response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch("http://localhost:3000/api/v1/sessions", {
         method: "DELETE",
         headers: {
           Cookie: `session_id=${nonexistentToken}`,
@@ -47,7 +47,7 @@ describe("GET /api/v1/user", () => {
 
       jest.useRealTimers();
 
-      var response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch("http://localhost:3000/api/v1/sessions", {
         method: "DELETE",
         headers: {
           Cookie: `session_id=${createdSession.token}`,
@@ -73,7 +73,7 @@ describe("GET /api/v1/user", () => {
 
       const createdSession = await orchestrator.createSession(createdUser);
 
-      var response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch("http://localhost:3000/api/v1/sessions", {
         method: "DELETE",
         headers: {
           Cookie: `session_id=${createdSession.token}`,
@@ -114,7 +114,7 @@ describe("GET /api/v1/user", () => {
       });
 
       // Double check invalid session
-      var userWithExpiredSessionResponse = await fetch(
+      const userWithExpiredSessionResponse = await fetch(
         "http://localhost:3000/api/v1/user",
         {
           method: "GET",

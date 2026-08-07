@@ -8,7 +8,7 @@ beforeAll(async () => {
 describe("PUT /api/v1/migration", () => {
   describe("Anonymous user", () => {
     test("Updating pending migrations", async () => {
-      var response = await fetch("http://localhost:3000/api/v1/migrations", {
+      const response = await fetch("http://localhost:3000/api/v1/migrations", {
         method: "PUT",
       });
       expect(response.status).toBe(405);
