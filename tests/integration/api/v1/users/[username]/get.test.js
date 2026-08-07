@@ -1,4 +1,4 @@
-import orchestrator from "tests/orchestrato.js";
+import orchestrator from "tests/orchestrator.js";
 import webserver from "infra/webserver.js";
 
 beforeAll(async () => {
