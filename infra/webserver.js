@@ -11,7 +11,7 @@ function getOrigin() {
 }
 
 const webserver = {
-  getOrigin,
+  origin: getOrigin,
 };
 
 export default webserver;
