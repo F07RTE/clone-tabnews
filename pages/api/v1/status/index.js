@@ -4,13 +4,10 @@ import controller from "infra/controller";
 import authorization from "models/authorization.js";
 import status from "models/status.js";
 
-const router = createRouter();
-
-router.use(controller.injectAnnonymousOrUser);
-
-router.get(getHandler);
-
-export default router.handler(controller.errorHandlers);
+export default createRouter()
+  .use(controller.injectAnnonymousOrUser)
+  .get(getHandler)
+  .handler(controller.errorHandlers);
 
 async function getHandler(request, response) {
   const userTryingToGet = request.context.user;
@@ -23,5 +20,5 @@ async function getHandler(request, response) {
     statusObject,
   );
 
-  response.status(200).json(secureOutputValues);
+  return response.status(200).json(secureOutputValues);
 }

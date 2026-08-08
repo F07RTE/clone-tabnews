@@ -5,14 +5,11 @@ import { ForbiddenError } from "infra/errors.js";
 import user from "models/user.js";
 import authorization from "models/authorization.js";
 
-const router = createRouter();
-
-router.use(controller.injectAnnonymousOrUser);
-
-router.get(getHandler);
-router.patch(controller.canRequest("update:user"), patchHandler);
-
-export default router.handler(controller.errorHandlers);
+export default createRouter()
+  .use(controller.injectAnnonymousOrUser)
+  .get(getHandler)
+  .patch(controller.canRequest("update:user"), patchHandler)
+  .handler(controller.errorHandlers);
 
 async function getHandler(request, response) {
   const userTryingToGet = request.context.user;
@@ -38,8 +35,8 @@ async function patchHandler(request, response) {
 
   if (!authorization.can(userTryingToPatch, "update:user", targetUser)) {
     throw new ForbiddenError({
-      message: "You don't have permission to update another user.",
-      action: "You don't have the feature to update another user.",
+      message: "You do not have permission to update another user.",
+      action: "You do not have the feature to update another user.",
     });
   }
 

@@ -2,6 +2,7 @@ import { version as uuidVersion } from "uuid";
 import setCookieParser from "set-cookie-parser";
 
 import orchestrator from "tests/orchestrator.js";
+import webserver from "infra/webserver.js";
 import session from "models/session.js";
 
 beforeAll(async () => {
@@ -17,7 +18,7 @@ describe("POST /api/v1/user", () => {
         password: "CorrectPassword",
       });
 
-      const response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch(`${webserver.origin()}/api/v1/sessions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,7 +46,7 @@ describe("POST /api/v1/user", () => {
         password: "CorrectPassword",
       });
 
-      const response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch(`${webserver.origin()}/api/v1/sessions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,7 +72,7 @@ describe("POST /api/v1/user", () => {
     test("With incorrect `email` and incorrect `password`", async () => {
       await orchestrator.createUser();
 
-      const response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch(`${webserver.origin()}/api/v1/sessions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -100,9 +101,9 @@ describe("POST /api/v1/user", () => {
         password: "CorrectPassword",
       });
 
-      await orchestrator.activateUser(createdUser.id);
+      await orchestrator.activateUser(createdUser);
 
-      const response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch(`${webserver.origin()}/api/v1/sessions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -137,9 +138,22 @@ describe("POST /api/v1/user", () => {
       const expiresAt = new Date(responseBody.expires_at);
       const createdAt = new Date(responseBody.created_at);
 
-      expiresAt.setMilliseconds(0);
-      createdAt.setMilliseconds(0);
-      expect(expiresAt - createdAt).toBe(session.EXPIRATION_IN_MILISECOND);
+      expect(expiresAt >= createdAt).toBe(true);
+
+      /*
+      expires_at is calculated before the database data insertion.
+      created_at is calculated during database persistence.
+      That might have a small miliseconds diference between the 30 days configured lifetime
+        when you calculate the diference between both dates saved on the database
+        to assert the test correctly we are allowing the 5000 miliseconds difference 
+        on the lifetime date.
+      */
+
+      const actualLifetimeInMiliseconds = expiresAt - createdAt;
+      const lifetimeDifferenceInMiliseconds =
+        session.EXPIRATION_IN_MILISECOND - actualLifetimeInMiliseconds;
+
+      expect(lifetimeDifferenceInMiliseconds).toBeLessThanOrEqual(5000);
 
       const parsedSetCookie = setCookieParser(response, {
         map: true,
@@ -151,6 +165,7 @@ describe("POST /api/v1/user", () => {
         maxAge: session.EXPIRATION_IN_MILISECOND / 1000,
         path: "/",
         httpOnly: true,
+        sameSite: "Lax",
       });
 
       function isHex(stringValue) {

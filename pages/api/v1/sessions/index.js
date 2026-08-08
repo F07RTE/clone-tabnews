@@ -6,26 +6,23 @@ import session from "models/session.js";
 import authorization from "models/authorization.js";
 import { ForbiddenError } from "infra/errors.js";
 
-const router = createRouter();
-
-router.use(controller.injectAnnonymousOrUser);
-
-router.post(controller.canRequest("create:session"), postHandler);
-router.delete(deleteHandler);
-
-export default router.handler(controller.errorHandlers);
+export default createRouter()
+  .use(controller.injectAnnonymousOrUser)
+  .post(controller.canRequest("create:session"), postHandler)
+  .delete(deleteHandler)
+  .handler(controller.errorHandlers);
 
 async function postHandler(request, response) {
   const sessionInputValues = request.body;
 
-  const autheticatedUser = await authenticator.getAuthenticatedUser(
+  const autheticatedUser = await authenticator.getUser(
     sessionInputValues.email,
     sessionInputValues.password,
   );
 
   if (!authorization.can(autheticatedUser, "create:session")) {
     throw new ForbiddenError({
-      message: `You don't have permission to perform this action`,
+      message: `You do not have permission to perform this action`,
       action: `Contact the support if you should have access to this feature.`,
     });
   }

@@ -1,7 +1,7 @@
 import orchestrator from "tests/orchestrator.js";
 import activation from "models/activation.js";
 import user from "models/user.js";
-import webserver from "infra/webserver";
+import webserver from "infra/webserver.js";
 
 beforeAll(async () => {
   await orchestrator.waitForAllServices();
@@ -16,7 +16,7 @@ describe("Use case: Registration Flow (all sucessfull)", () => {
   let sessionResponseBody;
 
   test("Create user account", async () => {
-    const response = await fetch("http://localhost:3000/api/v1/users", {
+    const response = await fetch(`${webserver.origin()}/api/v1/users`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -52,7 +52,7 @@ describe("Use case: Registration Flow (all sucessfull)", () => {
       lastEmail.text,
     );
     expect(lastEmail.text).toContain(
-      `${webserver.getOrigin()}/register/activate/${activationTokenFromEmailBody}`,
+      `${webserver.origin()}/register/activate/${activationTokenFromEmailBody}`,
     );
 
     activationTokenObject = await activation.findOneValidByActivationTokenId(
@@ -65,7 +65,7 @@ describe("Use case: Registration Flow (all sucessfull)", () => {
 
   test("Activation", async () => {
     const response = await fetch(
-      `http://localhost:3000/api/v1/activations/${activationTokenObject.id}`,
+      `${webserver.origin()}/api/v1/activations/${activationTokenObject.id}`,
       {
         method: "PATCH",
         headers: {
@@ -88,7 +88,7 @@ describe("Use case: Registration Flow (all sucessfull)", () => {
   });
 
   test("Login", async () => {
-    const response = await fetch("http://localhost:3000/api/v1/sessions", {
+    const response = await fetch(`${webserver.origin()}/api/v1/sessions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -107,7 +107,7 @@ describe("Use case: Registration Flow (all sucessfull)", () => {
   });
 
   test("Get user information", async () => {
-    const response = await fetch("http://localhost:3000/api/v1/user", {
+    const response = await fetch(`${webserver.origin()}/api/v1/user`, {
       method: "GET",
       headers: {
         Cookie: `session_id=${sessionResponseBody.token}`,

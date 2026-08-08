@@ -1,4 +1,5 @@
-import orchestrator from "tests/orchestrator";
+import orchestrator from "tests/orchestrator.js";
+import webserver from "infra/webserver.js";
 
 beforeAll(async () => {
   const userCreationWithFeaturesMigrationCount = 3;
@@ -13,7 +14,7 @@ beforeAll(async () => {
 describe("POST /api/v1/migration", () => {
   describe("Anonymous user", () => {
     test("Running pending migrations", async () => {
-      const response = await fetch("http://localhost:3000/api/v1/migrations", {
+      const response = await fetch(`${webserver.origin()}/api/v1/migrations`, {
         method: "POST",
       });
 
@@ -22,7 +23,7 @@ describe("POST /api/v1/migration", () => {
       const responseBody = await response.json();
       expect(responseBody).toEqual({
         name: "ForbiddenError",
-        message: "You don't have permission to perform this action.",
+        message: "You do not have permission to perform this action.",
         action: "Check if the user has the required feature create:migration.",
         status_code: 403,
       });
@@ -31,7 +32,7 @@ describe("POST /api/v1/migration", () => {
 
   describe("Default user", () => {
     test("Running pending migrations", async () => {
-      const response = await fetch("http://localhost:3000/api/v1/migrations", {
+      const response = await fetch(`${webserver.origin()}/api/v1/migrations`, {
         method: "POST",
       });
 
@@ -40,7 +41,7 @@ describe("POST /api/v1/migration", () => {
       const responseBody = await response.json();
       expect(responseBody).toEqual({
         name: "ForbiddenError",
-        message: "You don't have permission to perform this action.",
+        message: "You do not have permission to perform this action.",
         action: "Check if the user has the required feature create:migration.",
         status_code: 403,
       });
@@ -54,7 +55,7 @@ describe("POST /api/v1/migration", () => {
 
         test("For the first time", async () => {
           const createdUser = await orchestrator.createUser();
-          const activatedUser = await orchestrator.activateUser(createdUser.id);
+          const activatedUser = await orchestrator.activateUser(createdUser);
           await orchestrator.addFeaturesToUser(createdUser, [
             "create:migration",
             "read:migration",
@@ -62,7 +63,7 @@ describe("POST /api/v1/migration", () => {
           userSessionObject = await orchestrator.createSession(activatedUser);
 
           const response = await fetch(
-            "http://localhost:3000/api/v1/migrations",
+            `${webserver.origin()}/api/v1/migrations`,
             {
               method: "POST",
               headers: {
@@ -79,7 +80,7 @@ describe("POST /api/v1/migration", () => {
 
         test("For the second time", async () => {
           const response = await fetch(
-            "http://localhost:3000/api/v1/migrations",
+            `${webserver.origin()}/api/v1/migrations`,
             {
               method: "POST",
               headers: {

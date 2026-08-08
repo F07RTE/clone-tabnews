@@ -73,7 +73,7 @@ async function sendEmailToUser(user, activationToken) {
     subject: "Activate your account on FeedbackToHelp",
     text: `${user.username}, click on the link bellow to activate your account on FeedbackToHelp:
 
-${webserver.getOrigin()}/register/activate/${activationToken}
+${webserver.origin()}/register/activate/${activationToken}
 
 Best Regards,
 FeedbackToHelp team.

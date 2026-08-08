@@ -1,4 +1,6 @@
 import { version as uuidVersion } from "uuid";
+
+import webserver from "infra/webserver.js";
 import orchestrator from "tests/orchestrator.js";
 import activation from "models/activation.js";
 import user from "models/user.js";
@@ -13,7 +15,7 @@ describe("GET /api/v1/users/[username]", () => {
   describe("Anonymous user", () => {
     test("With nonexistent token", async () => {
       const response = await fetch(
-        `http://localhost:3000/api/v1/activations/eaf5e5b7-182e-438d-9310-6b0bc212d3c4`,
+        `${webserver.origin()}/api/v1/activations/eaf5e5b7-182e-438d-9310-6b0bc212d3c4`,
         {
           method: "PATCH",
         },
@@ -42,7 +44,7 @@ describe("GET /api/v1/users/[username]", () => {
       jest.useRealTimers();
 
       const response = await fetch(
-        `http://localhost:3000/api/v1/activations/${expiredActivationToken.id}`,
+        `${webserver.origin()}/api/v1/activations/${expiredActivationToken.id}`,
         {
           method: "PATCH",
         },
@@ -65,7 +67,7 @@ describe("GET /api/v1/users/[username]", () => {
       const createdActivationToken = await activation.create(createdUser.id);
 
       const response = await fetch(
-        `http://localhost:3000/api/v1/activations/${createdActivationToken.id}`,
+        `${webserver.origin()}/api/v1/activations/${createdActivationToken.id}`,
         {
           method: "PATCH",
         },
@@ -74,7 +76,7 @@ describe("GET /api/v1/users/[username]", () => {
       expect(response.status).toBe(200);
 
       const secondActivationResponse = await fetch(
-        `http://localhost:3000/api/v1/activations/${createdActivationToken.id}`,
+        `${webserver.origin()}/api/v1/activations/${createdActivationToken.id}`,
         {
           method: "PATCH",
           headers: {
@@ -99,7 +101,7 @@ describe("GET /api/v1/users/[username]", () => {
       const createdActivationToken = await activation.create(createdUser.id);
 
       const response = await fetch(
-        `http://localhost:3000/api/v1/activations/${createdActivationToken.id}`,
+        `${webserver.origin()}/api/v1/activations/${createdActivationToken.id}`,
         {
           method: "PATCH",
         },
@@ -143,11 +145,11 @@ describe("GET /api/v1/users/[username]", () => {
 
     test("With valid token, but already activated user", async () => {
       const createdUser = await orchestrator.createUser();
-      await orchestrator.activateUser(createdUser.id);
+      await orchestrator.activateUser(createdUser);
       const createdActivationToken = await activation.create(createdUser.id);
 
       const response = await fetch(
-        `http://localhost:3000/api/v1/activations/${createdActivationToken.id}`,
+        `${webserver.origin()}/api/v1/activations/${createdActivationToken.id}`,
         {
           method: "PATCH",
         },
@@ -168,14 +170,14 @@ describe("GET /api/v1/users/[username]", () => {
   describe("Default user", () => {
     test("With valid token, but already logged user", async () => {
       const user1 = await orchestrator.createUser();
-      await orchestrator.activateUser(user1.id);
+      await orchestrator.activateUser(user1);
       const user1Session = await orchestrator.createSession(user1);
 
       const user2 = await orchestrator.createUser();
       const user2ActivationToken = await activation.create(user2.id);
 
       const response = await fetch(
-        `http://localhost:3000/api/v1/activations/${user2ActivationToken.id}`,
+        `${webserver.origin()}/api/v1/activations/${user2ActivationToken.id}`,
         {
           method: "PATCH",
           headers: {
@@ -189,7 +191,7 @@ describe("GET /api/v1/users/[username]", () => {
 
       expect(responseBody).toEqual({
         name: "ForbiddenError",
-        message: "You don't have permission to perform this action.",
+        message: "You do not have permission to perform this action.",
         action:
           "Check if the user has the required feature read:activation_token.",
         status_code: 403,
