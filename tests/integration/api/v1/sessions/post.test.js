@@ -138,9 +138,22 @@ describe("POST /api/v1/user", () => {
       const expiresAt = new Date(responseBody.expires_at);
       const createdAt = new Date(responseBody.created_at);
 
-      expiresAt.setMilliseconds(0);
-      createdAt.setMilliseconds(0);
-      expect(expiresAt - createdAt).toBe(session.EXPIRATION_IN_MILISECOND);
+      expect(expiresAt >= createdAt).toBe(true);
+
+      /*
+      expires_at is calculated before the database data insertion.
+      created_at is calculated during database persistence.
+      That might have a small miliseconds diference between the 30 days configured lifetime
+        when you calculate the diference between both dates saved on the database
+        to assert the test correctly we are allowing the 5000 miliseconds difference 
+        on the lifetime date.
+      */
+
+      const actualLifetimeInMiliseconds = expiresAt - createdAt;
+      const lifetimeDifferenceInMiliseconds =
+        session.EXPIRATION_IN_MILISECOND - actualLifetimeInMiliseconds;
+
+      expect(lifetimeDifferenceInMiliseconds).toBeLessThanOrEqual(5000);
 
       const parsedSetCookie = setCookieParser(response, {
         map: true,
